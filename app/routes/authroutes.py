@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.schemas.authschemas import SignUpSchema, LoginSchema, TokenOut
+from app.schemas.authschemas import SignUpSchema, LoginSchema, TokenOut, UserOut
 from app.core.db import getsession
 from sqlalchemy.orm import Session
 from app.core.security import token_verify
@@ -17,7 +17,7 @@ async def signup(body: SignUpSchema, session : Session = Depends(getsession)):
         "token_type": "Bearer"
     }
 
-@authrouter.post("/signin")
+@authrouter.post("/signin", response_model=TokenOut)
 async def signin(body: LoginSchema, session: Session = Depends(getsession)):
     user_serv = UserService(session)
     signin = user_serv.signin(body.email, body.password)
@@ -26,6 +26,6 @@ async def signin(body: LoginSchema, session: Session = Depends(getsession)):
         "token_type": "Bearer"
     }
 
-@authrouter.get("/profile")
+@authrouter.get("/profile", response_model=UserOut)
 async def view_profile(user: User = Depends(token_verify)):
-    return {"nome": user.nome, "email": user.email}
+    return {"name": user.name, "email": user.email}
